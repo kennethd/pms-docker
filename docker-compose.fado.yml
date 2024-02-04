@@ -1,0 +1,16 @@
+version: '2'
+services:
+  plex:
+    container_name: plex
+    image: plexinc/pms-docker
+    restart: unless-stopped
+    environment:
+      - TZ=America/New_York
+      - PLEX_CLAIM=claim-qL1apxf-25vP5fQP8mbe
+    network_mode: host
+    volumes:
+      - /media/plex/database:/config
+      - /media/plex/transcode:/transcode
+      - /mnt/lacie/tv:/data/tv
+      - /mnt/lacie/movies:/data/movies
+      - /mnt/lacie/music:/data/music
