@@ -13,4 +13,5 @@ services:
       - /media/plex/transcode:/transcode
       - /mnt/lacie/tv:/data/tv
       - /mnt/lacie/movies:/data/movies
+      - /mnt/lacie/plex-movies:/data/plex-movies
       - /mnt/lacie/music:/data/music
