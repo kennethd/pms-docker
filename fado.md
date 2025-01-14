@@ -19,9 +19,8 @@ Allowing one to manage the server process via the usual commands:
 ```
 kenneth@fado ~/git/plex-pms-docker (fado) $ docker-compose up
 kenneth@fado ~/git/plex-pms-docker (fado) $ docker ps
-CONTAINER ID   IMAGE                COMMAND          CREATED        STATUS                  PORTS                                                                       
-   NAMES
-1e0f25d31684   plexinc/pms-docker   "/init"          16 hours ago   Up 16 hours (healthy)                               plex
+CONTAINER ID   IMAGE                COMMAND          CREATED        STATUS                  PORTS     NAMES
+1e0f25d31684   plexinc/pms-docker   "/init"          16 hours ago   Up 16 hours (healthy)             plex
 ```
 
 # useful commands
@@ -131,6 +130,25 @@ drwxr-sr-x 207 kenneth media  12K Feb  6  2024 /mnt/seagate/plex-movies
 drwxr-xr-x   2 kenneth media 4.0K Jan 13 19:51 /mnt/seagate/plex-mst3k
 drwxrwsr-x  32 kenneth media 4.0K Jan 24  2022 /mnt/seagate/torrents
 drwxrwsr-x  45 kenneth media 4.0K Jan 13 03:12 /mnt/seagate/tv
+```
+Plex serves the `tv` files directly, but because of the naming convention for
+movies, I created a separate directory dedicated to plex:
+```
+kenneth@fado /mnt/seagate $ ls -1 movies/  | head -n6
+Andrei Tarkovsky - 1966 - Andrei Rublev
+Andrei Tarkovsky - 1972 - Solaris
+Andrei Tarkovsky - 1979 - Stalker
+by-title
+by-year
+Dario Argento - 1977 - Suspira.mkv
+
+kenneth@fado /mnt/seagate $ ls -1 plex-movies/  | head -n6
+Across 110th Street (1972) {imdb-tt0068168}
+A Girl in Every Port (1928) {imdb-tt0018937}
+American Movie (1999) {imdb-tt0181288}
+And God Said To Cain (1970) {imdb-tt0064273}
+Andrei Rublev (1966) {imdb-tt0060107}
+Arsenal (1929) {imdb-tt0019649}
 ```
 
 # system
@@ -257,5 +275,5 @@ DirectMap1G:           0 kB
 ## resources
 
   1. instructions to rip dvd with subtitles based on https://www.internalpointers.com/post/convert-vob-files-mkv-ffmpeg
-
+  2. thanks, ATotalBastard! https://www.reddit.com/r/PleX/comments/11omm19/comment/lg2ch8t/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 
