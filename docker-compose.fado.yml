@@ -11,7 +11,10 @@ services:
     volumes:
       - /media/plex/database:/config
       - /media/plex/transcode:/transcode
-      - /mnt/seagate/tv:/data/tv
       - /mnt/seagate/movies:/data/movies
-      - /mnt/seagate/plex-movies:/data/plex-movies
       - /mnt/seagate/music:/data/music
+      - /mnt/seagate/plex-audioblogs:/data/plex-audioblogs
+      - /mnt/seagate/plex-live-shows:/data/live-shows
+      - /mnt/seagate/plex-movies:/data/plex-movies
+      - /mnt/seagate/plex-mst3k:/data/plex-mst3k
+      - /mnt/seagate/tv:/data/tv
