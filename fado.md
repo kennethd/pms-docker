@@ -4,8 +4,9 @@ document contains notes about the setup & maintenance of the plex server
 running there.
 
 Here and now, in early January 2025, I am resurrecting an old service that has
-been shut down for years due to an easily overheated external drive, serving
-movies, tv shows, and a few collections of music from a new replacement drive.
+been shut down for years due to an easily overheated external drive (and
+laziness), serving movies, tv shows, and a few collections of music from a new
+replacement drive.
 
 # setup
 The Plex server is running via the `plexinc/pms-docker` image, configured via
@@ -28,11 +29,78 @@ A reference of mostly CLI tools useful for maintinaing a digital library
 
 ## ripping dvds
 
+### rip dvd with subtitle track
+First, concat all of the `.VOB` files into one big one:
+```
+$ cat VTS_03_{1,2,3,4,5}.VOB > out/Heimat\ Chapter\ 1\ -\ Fernweh.vob
+```
+Next, examine the file to identify what's what:
+```
+$ ffmpeg -analyzeduration 100M -probesize 100M -i out/Heimat\ Chapter\ 1\ -\ Fernweh.vob
+```
+This example asks `ffmpeg` to scan the first 100mb of the file, `.VOB` files
+don't include a header describing the streams contained within, and if we only
+look at the first frame the subtitle info will probably not yet be present.
+
+This reports a bunch of stuff about your current version version of `ffmpeg`,
+options it was compiled with and so on, at the end there is a list of streams
+found in the `.VOB` file:
+```
+Input #0, mpeg, from 'out/Heimat Chapter 1 - Fernweh.vob':
+  Duration: 01:59:22.18, start: 0.280000, bitrate: 5168 kb/s
+  Stream #0:0[0x1bf]: Data: dvd_nav_packet
+  Stream #0:1[0x1e0]: Video: mpeg2video (Main), yuv420p(tv, top first), 720x576 [SAR 16:15 DAR 4:3], 25 fps, 25 tbr, 90k tbn
+    Side data:
+      cpb: bitrate max/min/avg: 9000000/0/0 buffer size: 1835008 vbv_delay: N/A
+  Stream #0:2[0x80]: Audio: ac3, 48000 Hz, stereo, fltp, 224 kb/s
+  Stream #0:3[0x20]: Subtitle: dvd_subtitle
+```
+Stream `0:0` is for dvd navigation, we don't need that, `0:1` is the movie
+itself, `0:2` is audio, and `0:3` the english subtitles, we want to keep all
+three of those.
+
+For a Plex-compatible output capable of combining these three streams into a
+single container, we will use a `.mkv` file format, encoding the video with
+`H.264` codec and audio as `mp3`.
+```
+$ ffmpeg -analyzeduration 100M -probesize 100M  \
+    -i Heimat\ Chapter\ 1\ -\ Fernweh.vob \
+    -map 0:1 -map 0:2 -map 0:3 \
+    -metadata:s:s:0 language=eng -metadata:s:s:0 title="English" \
+    -codec:v libx264 -crf 21 -codec:a libmp3lame -qscale:a 2 -codec:s copy \
+    -threads 16 \
+    Heimat\ Chapter\ 1\ -\ Fernweh.mkv
+```
+Once again, we need the `-analyzeduration 100M -probesize 100M` args (and they
+must come first) to instruct `ffmpeg` to scan for all the streams we want to
+extract.
+
+Alter the `threads` count to match the number of cores you have.
+
+The other options are copied from, and summarized at, the first link in the
+resources section below.
+
+### naming TV Show files for the Plex scanner
+I don't know exactly what the requirements are to make Plex recognize the
+added files, but thanks to **ATotalBastard** on reddit, I finally got my `.mkv` to
+show up in my collection & have verified that the subtitles work by putting
+the `.mkv` in a directory of exactly the same name, and including the `s01e01`
+style episode numbering scheme (previously I just had "Chapter 1"):
+```
+kenneth@fado /mnt/seagate/tv/Heimat (1984) $ ls -lhR
+.:
+drwxr-sr-x 2 kenneth media 4.0K Jan 14 17:35 'Heimat (1984) - s01e01 - Fernweh'
+
+'./Heimat (1984) - s01e01 - Fernweh':
+-rw-r--r-- 1 kenneth media 984K Jan 14 13:51  cover.jpg
+-rw-r--r-- 1 kenneth media 1.8G Jan 14 15:34 'Heimat (1984) - s01e01 - Fernweh.mkv'
+```
+
 ## ripping cds
 
 ## tagging mp3/ogg/flac files
 There are a lot of options for this since the old days when I created my own,
-which I am not endorsing, just leaving here with notes
+I am not particularly endorsing these, just leaving notes here 
 ### lltag
 ```
 $ lltag -a "Maths Balance Volumes" -A "Cattle Skulls and Railroad Tracks" --rename %a--%A--%n--%t  --rename-min -n4 -t "Midwestern Mountain Rumble/The Rolling Muddist Rumble"  track_4.mp3
@@ -185,4 +253,9 @@ DirectMap4k:      740432 kB
 DirectMap2M:    12812288 kB
 DirectMap1G:           0 kB
 ```
+
+## resources
+
+  1. instructions to rip dvd with subtitles based on https://www.internalpointers.com/post/convert-vob-files-mkv-ffmpeg
+
 
