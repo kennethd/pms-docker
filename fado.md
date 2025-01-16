@@ -352,6 +352,24 @@ And God Said To Cain (1970) {imdb-tt0064273}
 Andrei Rublev (1966) {imdb-tt0060107}
 Arsenal (1929) {imdb-tt0019649}
 ```
+Again, it seems to work best if files within the per-movie directory are named
+the same as the directory itself
+```
+kenneth@fado /mnt/seagate $ ls -l ./plex-movies/Andrei\ Rublev\ \(1966\)\ \{imdb-tt0060107\}/
+total 1434724
+-rw-r--r-- 1 kenneth media 734439424 Feb  4  2024 'Andrei Rublev (1966) {imdb-tt0060107} - Part 1.avi'
+-rw-r--r-- 1 kenneth media     55641 Feb  4  2024 'Andrei Rublev (1966) {imdb-tt0060107} - Part 1.srt'
+-rw-r--r-- 1 kenneth media 734609408 Feb  4  2024 'Andrei Rublev (1966) {imdb-tt0060107} - Part 2.avi'
+-rw-r--r-- 1 kenneth media     39751 Feb  4  2024 'Andrei Rublev (1966) {imdb-tt0060107} - Part 2.srt'
+```
+One problem I haven't found a solution for is the behavior of the web player
+when files are split, as above.  `Part 1` plays and transitions to `Part 2`
+just fine, but then it seems impossible to ever get back to `Part 1`, "Start
+from the beginning" only goes back to the beginning of `Part 2`.
+
+This is not really a supported use case, and the docs recommend joining the files:
+[https://support.plex.tv/articles/naming-and-organizing-your-movie-media-files/](https://support.plex.tv/articles/naming-and-organizing-your-movie-media-files/)
+It seems like it would be a tedious task to combine the subtitle files
 
 # system
 
