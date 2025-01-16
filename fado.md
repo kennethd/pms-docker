@@ -18,13 +18,14 @@ kenneth@fado ~/git/plex-pms-docker (fado) $ docker ps
 CONTAINER ID   IMAGE                COMMAND          CREATED        STATUS                  PORTS     NAMES
 1e0f25d31684   plexinc/pms-docker   "/init"          16 hours ago   Up 16 hours (healthy)             plex
 ```
+etc...
 
 # useful commands
 A reference of mostly CLI tools useful for maintinaing the digital library
 
-## ripping non-encrypted dvds
-Really, it is as simple as `cat`-ting the `.VOB` files together and converting
-to another format, start by mounting the DVD as a filesystem:
+## ripping dvds
+If the DVD is not encrypted, it is as simple as `cat`-ting the `.VOB` files
+together and converting to another format, start by mounting the DVD as a filesystem:
 ```
 kenneth@fado /mnt/seagate/dvd/Home Movies $ sudo mkdir -p /mnt/cddvdw
 kenneth@fado /mnt/seagate/dvd/Home Movies $ sudo mount -o ro /dev/sr0 /mnt/cddvdw/
@@ -40,18 +41,16 @@ until the last one `VTS_01_n.VOB` which is less than 1gb.
 
 If there are extras, etc on the disc they will show up as `VTS_02_*.VOB`, and so on.
 
-It's probably unneccessary, but I usually combine them into a single file on
-hdd first, rather than trying to encode directly from usb drive:
+Note I skip `VTS_01_0.VOB`, a much smaller file that I think is a menu screen:
 ```
 $ cat /mnt/cddvdw/VIDEO_TS/VTS_01_{1,2,3,4}.VOB > Home\ Movies.vob
 ```
-(note I skip `VTS_01_0.VOB`, a much smaller file that I think is a menu screen)
 
-To convert to `.mp4`, you can now do:
+To convert to `.mp4`, you can now do something like:
 ```
 $ ffmpeg -i Home\ Movies.vob -vcodec h264 -acodec mp2 Home\ Movies.mp4
 ```
-There are a ton of options, see the first link in the **resources** section below for a start.
+There are a ton of options, see some terse intro examples [here](https://shyamjos.com/easily-rip-dvds-in-linux-with-ffmpeg/).
 
 ### software for encrypted dvds
 For most commercial DVDs, you'll need VLC's `libdvdcss` to be installed on your system.
@@ -63,19 +62,23 @@ $ sudo apt-add-repository contrib
 $ sudo apt update && sudo apt upgrade
 $ sudo apt install libdvd-pkg
 $ sudo dpkg-reconfigure libdvd-pkg
-$ sudo apt install regionset libavcodec-extra libdvdread8 libdvdread-dev
+$ sudo apt install regionset libavcodec-extra
 ```
-See the HOWTO at the fourth link in the **resources** section below for a bit more description.
+See this [HOWTO](https://www.cyberciti.biz/faq/installing-plugins-codecs-libdvdcss-in-debian-ubuntu-linux/) for a bit more description.
 
 For ripping encrypted DVDs on the command line, `dvdbackup` is preferred.
+```
+$ sudo apt install dvdbackup libdvdread8 libdvdread-dev
+```
 
-`handbrake` is a popular package that can be used to transcode dvd files, I
+`handbrake` is a popular package that can be used to rip & transcode dvds, I
 think it has some Blu-Ray features that `ffmpeg` doesn't, but I don't own any
 Blu-Ray discs, so I've never tried it.  There is a separate CLI package if you
 want to try it:
 ```
-$ sudo apt install handbrake-cli dvdbackup
+$ sudo apt install handbrake-cli
 ```
+It has a very windows-style interface
 
 ### create backup of encrypted dvd
 Begin by examining the DVD with `dvdbackup -I` (again, your device may be
@@ -216,12 +219,11 @@ extract.
 
 Alter the `threads` count to match the number of cores you have.
 
-The other options are copied from, and summarized at, the second link in the
-resources section below.
+The other options are copied from, and summarized at, [this page](https://www.internalpointers.com/post/convert-vob-files-mkv-ffmpeg)
 
 ### naming TV Show files for the Plex scanner
 I don't know exactly what the requirements are to make Plex recognize the
-added files, but thanks to **ATotalBastard** on reddit, I finally got my `.mkv` to
+added files, but thanks to [ATotalBastard](https://www.reddit.com/r/PleX/comments/11omm19/comment/lg2ch8t/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button) on reddit, I finally got my `.mkv` to
 show up in my collection & have verified that the subtitles work by putting
 the `.mkv` in a directory of exactly the same name, and including the `s01e01`
 style episode numbering scheme (previously I just had "Chapter 1"):
@@ -487,12 +489,4 @@ DirectMap4k:      740432 kB
 DirectMap2M:    12812288 kB
 DirectMap1G:           0 kB
 ```
-
-## resources
-
-  1. nice set of terse instructions to rip dvd with ffmpeg https://shyamjos.com/easily-rip-dvds-in-linux-with-ffmpeg/
-  2. instructions to rip dvd with subtitles based on https://www.internalpointers.com/post/convert-vob-files-mkv-ffmpeg
-  3. thanks, ATotalBastard! https://www.reddit.com/r/PleX/comments/11omm19/comment/lg2ch8t/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
-  4. https://www.cyberciti.biz/faq/installing-plugins-codecs-libdvdcss-in-debian-ubuntu-linux/
-  5. `dvdbackup` https://dvdbackup.sourceforge.net/
 
