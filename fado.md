@@ -23,6 +23,85 @@ etc...
 # useful commands
 A reference of mostly CLI tools useful for maintinaing the digital library
 
+## ripping cds
+Lots of options for ripping CDs and converting audio files, `abcde` looks
+nice for being configurable and outputting directly to ogg/flac/mp3, but it
+wants to install a boatload of stuff, including an MTA, which turns me off
+quite a bit
+
+### cdparanoia
+My old favorite, particularly for old scratchy CDs, it only ouputs `.wav` or `.aiff`
+files, which then need to be converted.  It has a batch mode which will output
+one file per track, and is good at detecting your CD drive, so is usually as
+simple as:
+```
+$ cdparanoia -B
+```
+
+### lame
+`lame` is the classic mp3 encoder I favored back in the oughts, pretty
+straightforward, converts the `.wav`s outputted by `cdparanoia` into `.mp3`,
+allowing the setting of id3 tags, though it requires yet another step for renaming the files:
+```
+$ for NUM in $(seq 18); do lame --ta Migala --tl "diciembre, 3 a.m." --ty 1997 --tc "Acuarela NOIS 1002" --tn $NUM/18 track$(printf "%02d" $NUM).cdda.wav track$(printf "%02d" $NUM).mp3 ; done
+```
+We still have to go back and add the song titles however...
+
+### id3v2
+id3 tagger utility with support for version 2 tags
+
+Skipping ahead to incorporate the next section into a pipeline, iterate over the
+song titles and finish off the id3 tags and rename with a series of commands like this:
+```
+$ id3v2 -t "Isabella Afterhours" track13.mp3  && id3v2 -l track13.mp3 && lltag-rename --yes track13.mp3  && ls
+```
+In the old days there were services like MusicBrainz, etc that would save you
+the trouble of ever typing the id3 tag values, I don't know if they still
+exist, I never minded it myself.
+
+The output from that second command in the pipeline will look something like this:
+```
+kenneth@fado /mnt/seagate/music/migala/diciembre,_3_a.m. $ id3v2 -l track01.mp3
+id3v1 tag info for track01.mp3:
+Title  : Dead Moon, Cactus & 10% Blue    Artist: Migala
+Album  : diciembre, 3 a.m.               Year: 1997, Genre: Unknown (255)
+Comment: Acuarela NOIS 1002              Track: 1
+
+id3v2 tag info for track01.mp3:
+TSSE (Software/Hardware and settings used for encoding): LAME 64bits version 3.100 (http://lame.sf.net)
+TPE1 (Lead performer(s)/Soloist(s)): Migala
+TALB (Album/Movie/Show title): diciembre, 3 a.m.
+TYER (Year): 1997
+COMM (Comments): ()[eng]: Acuarela NOIS 1002
+TRCK (Track number/Position in set): 1/18
+TLEN (Length): 81786
+COMM (Comments): (ID3v1 Comment)[XXX]: Acuarela NOIS 1002
+TIT2 (Title/songname/content description): Dead Moon, Cactus & 10% Blue
+```
+
+### lltag
+For renaming the files based on id3 tag values, I am currently using this alias, or the various artists alt:
+```
+alias lltag-rename="lltag --rename %a--%A--%n--%t --rename-min --rename-sep _ --rename-regexp \"s/'//\""
+alias lltag-rename-va="lltag --rename %A--%n--%a--%t --rename-min --rename-sep _ --rename-regexp \"s/'//\""
+```
+
+`lltag` does also support setting tags, id3v2 support is still marked as experimental, and default id3v1 limits fields to 30 chars:
+```
+$ lltag -a "Maths Balance Volumes" \
+        -A "Cattle Skulls and Railroad Tracks" \
+        -n4 -t "Midwestern Mountain Rumble/The Rolling Muddist Rumble"  \
+        --rename %a--%A--%n--%t --rename-min \
+        track_4.mp3
+
+maths balance volumes--cattle skulls and railroad tracks--04--midwestern mountain rumble-the rolling muddist rumble.mp3:
+  ARTIST=Maths Balance Volumes
+  TITLE=Midwestern Mountain Rumble/The
+  ALBUM=Cattle Skulls and Railroad Tra
+  NUMBER=4
+  COMMENT=Chocolate Monk
+```
+
 ## ripping dvds
 If the DVD is not encrypted, it is as simple as `cat`-ting the `.VOB` files
 together and converting to another format, start by mounting the DVD as a filesystem:
@@ -221,100 +300,6 @@ Alter the `threads` count to match the number of cores you have.
 
 The other options are copied from, and summarized at, [this page](https://www.internalpointers.com/post/convert-vob-files-mkv-ffmpeg)
 
-### naming TV Show files for the Plex scanner
-I don't know exactly what the requirements are to make Plex recognize the
-added files, but thanks to [ATotalBastard](https://www.reddit.com/r/PleX/comments/11omm19/comment/lg2ch8t/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button) on reddit, I finally got my `.mkv` to
-show up in my collection & have verified that the subtitles work by putting
-the `.mkv` in a directory of exactly the same name, and including the `s01e01`
-style episode numbering scheme (previously I just had "Chapter 1"):
-```
-kenneth@fado /mnt/seagate/tv/Heimat (1984) $ ls -lhR
-.:
-drwxr-sr-x 2 kenneth media 4.0K Jan 14 17:35 'Heimat (1984) - s01e01 - Fernweh'
-
-'./Heimat (1984) - s01e01 - Fernweh':
--rw-r--r-- 1 kenneth media 984K Jan 14 13:51  cover.jpg
--rw-r--r-- 1 kenneth media 1.8G Jan 14 15:34 'Heimat (1984) - s01e01 - Fernweh.mkv'
-```
-
-## ripping cds
-Lots of options for ripping CDs and converting audio files, `abcde` looks
-nice for being configurable and outputting directly to ogg/flac/mp3, but it
-wants to install a boatload of stuff, including an MTA, which turns me off
-quite a bit
-
-There are a lot of options for this stuff since the old days when I created my own,
-I am not particularly endorsing these, just leaving notes here
-
-### cdparanoia
-My old favorite, particularly for old scratchy CDs, it only ouputs `.wav` or `.aiff`
-files, which then need to be converted.  It has a batch mode which will output
-one file per track, and is good at detecting your CD drive, so is usually as
-simple as:
-```
-$ cdparanoia -B
-```
-
-### lame
-`lame` is the classic mp3 encoder I favored back in the oughts, pretty
-straightforward, converts the `.wav`s outputted by `cdparanoia` into `.mp3`,
-allowing the setting of id3 tags, though it requires yet another step for renaming the files:
-```
-$ for NUM in $(seq 18); do lame --ta Migala --tl "diciembre, 3 a.m." --ty 1997 --tc "Acuarela NOIS 1002" --tn $NUM/18 track$(printf "%02d" $NUM).cdda.wav track$(printf "%02d" $NUM).mp3 ; done
-```
-We still have to go back and add the song titles however...
-
-### id3v2
-id3 tagger utility with support for id3v2.
-```
-kenneth@fado /mnt/seagate/music/migala/diciembre,_3_a.m. $ id3v2 -l track01.mp3
-id3v1 tag info for track01.mp3:
-Title  : Dead Moon, Cactus & 10% Blue    Artist: Migala
-Album  : diciembre, 3 a.m.               Year: 1997, Genre: Unknown (255)
-Comment: Acuarela NOIS 1002              Track: 1
-id3v2 tag info for track01.mp3:
-TSSE (Software/Hardware and settings used for encoding): LAME 64bits version 3.100 (http://lame.sf.net)
-TPE1 (Lead performer(s)/Soloist(s)): Migala
-TALB (Album/Movie/Show title): diciembre, 3 a.m.
-TYER (Year): 1997
-COMM (Comments): ()[eng]: Acuarela NOIS 1002
-TRCK (Track number/Position in set): 1/18
-TLEN (Length): 81786
-COMM (Comments): (ID3v1 Comment)[XXX]: Acuarela NOIS 1002
-TIT2 (Title/songname/content description): Dead Moon, Cactus & 10% Blue
-```
-Skipping ahead to incorporate the next section into a pipeline, I usually just
-iterate over the song titles and finish off the id3 tags and rename with a
-series of commands like this:
-```
-$ id3v2 -t "Isabella Afterhours" track13.mp3  && id3v2 -l track13.mp3 && lltag-rename --yes track13.mp3  && ls
-```
-In the old days there were services like MusicBrainz, etc that would save you
-the trouble of ever typing the id3 tag values, I don't know if they still
-exist, I never minded it myself.
-
-### lltag
-For renaming the files based on id3 tag values, I am currently using this alias, or the various artists alt:
-```
-alias lltag-rename="lltag --rename %a--%A--%n--%t --rename-min --rename-sep _ --rename-regexp \"s/'//\""
-alias lltag-rename-va="lltag --rename %A--%n--%a--%t --rename-min --rename-sep _ --rename-regexp \"s/'//\""
-```
-
-`lltag` does also support setting tags, id3v2 support is still marked as experimental, and default id3v1 limits fields to 30 chars:
-```
-$ lltag -a "Maths Balance Volumes" \
-        -A "Cattle Skulls and Railroad Tracks" \
-        -n4 -t "Midwestern Mountain Rumble/The Rolling Muddist Rumble"  \
-        --rename %a--%A--%n--%t --rename-min \
-        track_4.mp3
-
-maths balance volumes--cattle skulls and railroad tracks--04--midwestern mountain rumble-the rolling muddist rumble.mp3:
-  ARTIST=Maths Balance Volumes
-  TITLE=Midwestern Mountain Rumble/The
-  ALBUM=Cattle Skulls and Railroad Tra
-  NUMBER=4
-  COMMENT=Chocolate Monk
-```
 
 # files
 The files are served from an external usb3 drive formatted with an ext4 fs.
@@ -331,6 +316,23 @@ drwxr-xr-x   2 kenneth media 4.0K Jan 13 19:51 /mnt/seagate/plex-mst3k
 drwxrwsr-x  32 kenneth media 4.0K Jan 24  2022 /mnt/seagate/torrents
 drwxrwsr-x  45 kenneth media 4.0K Jan 13 03:12 /mnt/seagate/tv
 ```
+
+## TV Shows
+I don't know exactly what the requirements are to make Plex recognize newly
+added files, but thanks to [ATotalBastard](https://www.reddit.com/r/PleX/comments/11omm19/comment/lg2ch8t/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button) on reddit, I finally got my `.mkv` to
+show up in my collection & have verified that the subtitles work by putting
+the `.mkv` in a directory of exactly the same name, and including the `s01e01`
+style episode numbering scheme (previously I just had "Chapter 1"):
+```
+kenneth@fado /mnt/seagate/tv/Heimat (1984) $ ls -lhR
+.:
+drwxr-sr-x 2 kenneth media 4.0K Jan 14 17:35 'Heimat (1984) - s01e01 - Fernweh'
+
+'./Heimat (1984) - s01e01 - Fernweh':
+-rw-r--r-- 1 kenneth media 1.8G Jan 14 15:34 'Heimat (1984) - s01e01 - Fernweh.mkv'
+```
+
+## Movies
 Plex serves the `tv` files directly, but because of the naming convention for
 movies, I created a separate directory dedicated to plex:
 ```
