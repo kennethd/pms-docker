@@ -319,17 +319,23 @@ drwxrwsr-x  45 kenneth media 4.0K Jan 13 03:12 /mnt/seagate/tv
 
 ## TV Shows
 I don't know exactly what the requirements are to make Plex recognize newly
-added files, but thanks to [ATotalBastard](https://www.reddit.com/r/PleX/comments/11omm19/comment/lg2ch8t/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button) on reddit, I finally got my `.mkv` to
-show up in my collection & have verified that the subtitles work by putting
-the `.mkv` in a directory of exactly the same name, and including the `s01e01`
-style episode numbering scheme (previously I just had "Chapter 1"):
+added files, but I finally got my `.mkv` files to show up in my collection &
+have verified that the subtitles work by putting them in a directory of the
+same name, and including the `s01e01` style episode numbering scheme
+(previously I just had "Chapter 1", etc..):
 ```
-kenneth@fado /mnt/seagate/tv/Heimat (1984) $ ls -lhR
-.:
-drwxr-sr-x 2 kenneth media 4.0K Jan 14 17:35 'Heimat (1984) - s01e01 - Fernweh'
-
-'./Heimat (1984) - s01e01 - Fernweh':
--rw-r--r-- 1 kenneth media 1.8G Jan 14 15:34 'Heimat (1984) - s01e01 - Fernweh.mkv'
+kenneth@fado /mnt/seagate $ find  tv/Heimat\ \(1984\)/  -name '*.mkv' | sort
+tv/Heimat (1984)/Disc 1/Heimat (1984) - s01e01 - Fernweh.mkv
+tv/Heimat (1984)/Disc 2/Heimat (1984) - s01e02 - Die Mitte der Welt.mkv
+tv/Heimat (1984)/Disc 2/Heimat (1984) - s01e03 - Weinacht wie noch nie.mkv
+tv/Heimat (1984)/Disc 3/Heimat (1984) - s01e04 - Reichshöhenstraße.mkv
+tv/Heimat (1984)/Disc 3/Heimat (1984) - s01e05 - Auf und davon und zurück.mkv
+tv/Heimat (1984)/Disc 3/Heimat (1984) - s01e06 - Heimatfront.mkv
+tv/Heimat (1984)/Disc 4/Heimat (1984) - s01e07 - Die Liebe der Soldaten.mkv
+tv/Heimat (1984)/Disc 4/Heimat (1984) - s01e08 - Der Amerikaner.mkv
+tv/Heimat (1984)/Disc 5/Heimat (1984) - s01e09 - Hermännchen.mkv
+tv/Heimat (1984)/Disc 6/Heimat (1984) - s01e10 - Die stolzen Jahre.mkv
+tv/Heimat (1984)/Disc 6/Heimat (1984) - s01e11 - Das Fest der Lebenden und der Toten - Herbst 1982.mkv
 ```
 
 ## Movies
